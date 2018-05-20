@@ -30,17 +30,17 @@ expression			:  INTEGER_LITERAL exp
 						| '!' expression exp
 						| '(' expression ')' exp;
 exp					: ( '&&' | '<' | '+' | '-' | '*' ) expression
-						|
 						| '[' expression ']'
 						| '.' 'length'
-						| '.' identifier '(' ( expression ( ',' expression )* )? ')';
+						| '.' identifier '(' ( expression ( ',' expression )* )? ')'
+						| ;
 
 
 identifier 			: IDENTIFIER;
 
 INTEGER_LITERAL				: [0-9];
-IDENTIFIER					: ([A-z])([A-z]|[0-9]*|[_])*;
-COMMENT_SINGLE_LINE			: [(\/\/.*)] -> skip;
+IDENTIFIER					: ([A-Z]|[a-z])([A-Z]|[a-z]|[0-9]*|[_])*;
+COMMENT_SINGLE_LINE			: [\/][\/](.)*? -> skip;
 COMMENT_MULTI_LINE			: [\/\*]([^\*]|([\*]+([^\*\/])))*([\*]+[\/]) -> skip;
 WHITESPACE					: [ \t\r\n\f] -> skip;
 
