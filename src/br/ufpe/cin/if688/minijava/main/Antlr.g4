@@ -20,10 +20,10 @@ statement 			: '{' ( statement )* '}'
 						| 'System.out.println' '(' expression ')' ';'
 						| identifier '=' expression ';'
 						| identifier '[' expression ']' '=' expression ';';
-expression 			: <assoc=left> expression ( '&&' | '<' | '+' | '-' | '*' ) expression
-						| <assoc=left> expression '[' expression ']'
-						| <assoc=left> expression '.' 'length'
-						| <assoc=left> expression '.' identifier '(' ( expression ( ',' expression )* )? ')'
+expression 			: expression ( '&&' | '<' | '+' | '-' | '*' ) expression
+						| expression '[' expression ']'
+						| expression '.' 'length'
+						| expression '.' identifier '(' ( expression ( ',' expression )* )? ')'
 						| INTEGER_LITERAL
 						| 'true'
 						| 'false'
@@ -39,7 +39,7 @@ identifier 			: IDENTIFIER;
 INTEGER_LITERAL				: [0-9];
 IDENTIFIER					: ([A-Z]|[a-z])([A-Z]|[a-z]|[0-9]*|[_])*;
 COMMENT_SINGLE_LINE			: [\/][\/](.)*? -> skip;
-COMMENT_MULTI_LINE			: [\/\*]([^\*]|([\*]+([^\*\/])))*([\*]+[\/]) -> skip;
+COMMENT_MULTI_LINE			: [\/][\*]([^\*]|([\*]+([^\*\/])))*([\*]+[\/]) -> skip;
 WHITESPACE					: [ \t\r\n\f] -> skip;
 
 
