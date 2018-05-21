@@ -20,21 +20,19 @@ statement 			: '{' ( statement )* '}'
 						| 'System.out.println' '(' expression ')' ';'
 						| identifier '=' expression ';'
 						| identifier '[' expression ']' '=' expression ';';
-expression			:  INTEGER_LITERAL exp
-						| 'true' exp
-						| 'false' exp
-						| identifier exp
-						| 'this' exp
-						| 'new' 'int' '[' expression ']' exp
-						| 'new' identifier '(' ')' exp
-						| '!' expression exp
-						| '(' expression ')' exp;
-exp					: ( '&&' | '<' | '+' | '-' | '*' ) expression
-						| '[' expression ']'
-						| '.' 'length'
-						| '.' identifier '(' ( expression ( ',' expression )* )? ')'
-						| ;
-
+expression 			: <assoc=left> expression ( '&&' | '<' | '+' | '-' | '*' ) expression
+						| <assoc=left> expression '[' expression ']'
+						| <assoc=left> expression '.' 'length'
+						| <assoc=left> expression '.' identifier '(' ( expression ( ',' expression )* )? ')'
+						| INTEGER_LITERAL
+						| 'true'
+						| 'false'
+						| identifier
+						| 'this'
+						| 'new' 'int' '[' expression ']'
+						| 'new' identifier '(' ')'
+						| '!' expression
+						| '(' expression ')';
 
 identifier 			: IDENTIFIER;
 
