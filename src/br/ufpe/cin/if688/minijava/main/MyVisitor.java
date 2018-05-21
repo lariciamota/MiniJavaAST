@@ -1,5 +1,6 @@
 package br.ufpe.cin.if688.minijava.main;
 
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
@@ -38,6 +39,7 @@ import br.ufpe.cin.if688.minijava.ast.Program;
 import br.ufpe.cin.if688.minijava.ast.This;
 import br.ufpe.cin.if688.minijava.ast.Times;
 import br.ufpe.cin.if688.minijava.ast.True;
+import br.ufpe.cin.if688.minijava.ast.Type;
 import br.ufpe.cin.if688.minijava.ast.VarDecl;
 import br.ufpe.cin.if688.minijava.ast.While;
 import br.ufpe.cin.if688.minijava.main.AntlrParser.ClassDeclarationContext;
@@ -53,32 +55,28 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visit(ParseTree arg0) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Object visitChildren(RuleNode arg0) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Object visitErrorNode(ErrorNode arg0) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Object visitTerminal(TerminalNode arg0) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Object visitIdentifier(IdentifierContext ctx) {
-		// TODO Auto-generated method stub
-		return null;
+		String id = ctx.getText();
+		return new Identifier(id);
 	}
 
 	@Override
@@ -127,8 +125,10 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visitVarDeclaration(VarDeclarationContext ctx) {
-		// TODO Auto-generated method stub
-		return null;
+		Type t = (Type) ctx.type().accept(this);
+		Identifier i = (Identifier) ctx.identifier().accept(this);
+		
+		return new VarDecl(t, i);
 	}
 
 	@Override
