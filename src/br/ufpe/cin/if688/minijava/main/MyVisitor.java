@@ -21,8 +21,10 @@ import br.ufpe.cin.if688.minijava.ast.ClassDecl;
 import br.ufpe.cin.if688.minijava.ast.ClassDeclExtends;
 import br.ufpe.cin.if688.minijava.ast.ClassDeclList;
 import br.ufpe.cin.if688.minijava.ast.ClassDeclSimple;
+import br.ufpe.cin.if688.minijava.ast.Exp;
 import br.ufpe.cin.if688.minijava.ast.False;
 import br.ufpe.cin.if688.minijava.ast.Formal;
+import br.ufpe.cin.if688.minijava.ast.FormalList;
 import br.ufpe.cin.if688.minijava.ast.Identifier;
 import br.ufpe.cin.if688.minijava.ast.IdentifierExp;
 import br.ufpe.cin.if688.minijava.ast.IdentifierType;
@@ -33,6 +35,7 @@ import br.ufpe.cin.if688.minijava.ast.IntegerType;
 import br.ufpe.cin.if688.minijava.ast.LessThan;
 import br.ufpe.cin.if688.minijava.ast.MainClass;
 import br.ufpe.cin.if688.minijava.ast.MethodDecl;
+import br.ufpe.cin.if688.minijava.ast.MethodDeclList;
 import br.ufpe.cin.if688.minijava.ast.Minus;
 import br.ufpe.cin.if688.minijava.ast.NewArray;
 import br.ufpe.cin.if688.minijava.ast.NewObject;
@@ -41,11 +44,13 @@ import br.ufpe.cin.if688.minijava.ast.Plus;
 import br.ufpe.cin.if688.minijava.ast.Print;
 import br.ufpe.cin.if688.minijava.ast.Program;
 import br.ufpe.cin.if688.minijava.ast.Statement;
+import br.ufpe.cin.if688.minijava.ast.StatementList;
 import br.ufpe.cin.if688.minijava.ast.This;
 import br.ufpe.cin.if688.minijava.ast.Times;
 import br.ufpe.cin.if688.minijava.ast.True;
 import br.ufpe.cin.if688.minijava.ast.Type;
 import br.ufpe.cin.if688.minijava.ast.VarDecl;
+import br.ufpe.cin.if688.minijava.ast.VarDeclList;
 import br.ufpe.cin.if688.minijava.ast.While;
 import br.ufpe.cin.if688.minijava.main.AntlrParser.ClassDeclarationContext;
 import br.ufpe.cin.if688.minijava.main.AntlrParser.ExpressionContext;
@@ -86,14 +91,50 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visitMethodDeclaration(MethodDeclarationContext ctx) {
-		// TODO Auto-generated method stub
-		return null;
+		/*methodDeclaration: 'public' type identifier '(' ( type identifier ( ',' type identifier )* )? ')' '{' ( varDeclaration )* ( statement )* 'return' expression ';' '}' 
+		 type identifier 
+		 ((type identifier)*)
+		 varDeclaration *
+		 Statement *
+		 Expression
+		 */
+		Type t = (Type) ctx.type(0).accept(this);
+		Identifier i = (Identifier) ctx.identifier(0).accept(this);
+		boolean first = true;
+		
+		FormalList fl = new FormalList();
+		for(int n = 0; n < ctx.identifier().size(); n++) {
+			Type ft = (Type) ctx.type(n).accept(this);
+			Identifier fi = (Identifier) ctx.identifier(n).accept(this);
+			fl.addElement(new Formal(ft, fi));
+		}
+		
+		Iterator<VarDeclarationContext> iv = (Iterator) ctx.varDeclaration().iterator();
+		VarDeclList vl = new VarDeclList();
+		while(iv.hasNext()) {
+			vl.addElement((VarDecl) iv.next().accept(this));
+		}
+		
+		Iterator<StatementContext> is = (Iterator) ctx.varDeclaration().iterator();
+		StatementList sl = new StatementList();
+		while(is.hasNext()) {
+			sl.addElement((Statement) is.next().accept(this));
+		}
+		
+		
+		Exp e = (Exp) ctx.expression().accept(this);
+		return new MethodDecl(t, i, fl, vl, sl, e);
 	}
 
 	@Override
 	public Object visitGoal(GoalContext ctx) {
-		// TODO Auto-generated method stub
-		return null;
+		MainClass m = (MainClass) ctx.mainClass().accept(this);
+		ClassDeclList cl = new ClassDeclList();
+		Iterator<ClassDeclarationContext> it = (Iterator) ctx.classDeclaration();
+		while(it.hasNext()) {
+			cl.addElement((ClassDecl) it.next().accept(this));
+		}
+		return new Program(m, cl);
 	}
 
 	@Override
@@ -140,8 +181,30 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visitClassDeclaration(ClassDeclarationContext ctx) {
-		// TODO Auto-generated method stub
-		return null;
+		Identifier i1 = (Identifier) ctx.identifier(0).accept(this);
+		
+		Iterator<VarDeclarationContext> it = (Iterator) ctx.varDeclaration().iterator();
+		VarDeclList vl = new VarDeclList();
+		while(it.hasNext()) {
+			vl.addElement((VarDecl) it.next().accept(this));
+		}
+		
+		Iterator<MethodDeclarationContext> it2 = (Iterator) ctx.methodDeclaration();
+		MethodDeclList ml = new MethodDeclList();
+		while(it2.hasNext()) {
+			ml.addElement((MethodDecl) it2.next().accept(this));
+		}
+		if( ctx.identifier(1) != null) {
+			Identifier i2 = (Identifier) ctx.identifier(1).accept(this);
+			return new ClassDeclExtends(i1, i2, vl, ml);
+		}
+		return new ClassDeclSimple(i1, vl, ml);
 	}
 
 }
+
+
+
+
+
+
