@@ -1,5 +1,7 @@
 package br.ufpe.cin.if688.minijava.main;
 
+import java.util.Iterator;
+
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -15,7 +17,9 @@ import br.ufpe.cin.if688.minijava.ast.Assign;
 import br.ufpe.cin.if688.minijava.ast.Block;
 import br.ufpe.cin.if688.minijava.ast.BooleanType;
 import br.ufpe.cin.if688.minijava.ast.Call;
+import br.ufpe.cin.if688.minijava.ast.ClassDecl;
 import br.ufpe.cin.if688.minijava.ast.ClassDeclExtends;
+import br.ufpe.cin.if688.minijava.ast.ClassDeclList;
 import br.ufpe.cin.if688.minijava.ast.ClassDeclSimple;
 import br.ufpe.cin.if688.minijava.ast.False;
 import br.ufpe.cin.if688.minijava.ast.Formal;
@@ -36,6 +40,7 @@ import br.ufpe.cin.if688.minijava.ast.Not;
 import br.ufpe.cin.if688.minijava.ast.Plus;
 import br.ufpe.cin.if688.minijava.ast.Print;
 import br.ufpe.cin.if688.minijava.ast.Program;
+import br.ufpe.cin.if688.minijava.ast.Statement;
 import br.ufpe.cin.if688.minijava.ast.This;
 import br.ufpe.cin.if688.minijava.ast.Times;
 import br.ufpe.cin.if688.minijava.ast.True;
@@ -99,8 +104,10 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visitMainClass(MainClassContext ctx) {
-		// TODO Auto-generated method stub
-		return null;
+		Identifier im = (Identifier) ctx.identifier(0).accept(this);
+		Identifier ia = (Identifier) ctx.identifier(1).accept(this);
+		Statement s = (Statement) ctx.statement().accept(this);
+		return new MainClass(im, ia, s);
 	}
 
 	@Override
