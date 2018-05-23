@@ -93,7 +93,6 @@ public class MyVisitor implements AntlrVisitor<Object>{
 	public Object visitMethodDeclaration(MethodDeclarationContext ctx) {
 		Type t = (Type) ctx.type(0).accept(this);
 		Identifier i = (Identifier) ctx.identifier(0).accept(this);
-		boolean first = true;
 		
 		FormalList fl = new FormalList();
 		for(int n = 0; n < ctx.identifier().size(); n++) {
@@ -102,13 +101,13 @@ public class MyVisitor implements AntlrVisitor<Object>{
 			fl.addElement(new Formal(ft, fi));
 		}
 		
-		Iterator<VarDeclarationContext> iv = (Iterator) ctx.varDeclaration().iterator();
+		Iterator<VarDeclarationContext> iv = ctx.varDeclaration().iterator();
 		VarDeclList vl = new VarDeclList();
 		while(iv.hasNext()) {
 			vl.addElement((VarDecl) iv.next().accept(this));
 		}
 		
-		Iterator<StatementContext> is = (Iterator) ctx.varDeclaration().iterator();
+		Iterator<StatementContext> is = ctx.statement().iterator();
 		StatementList sl = new StatementList();
 		while(is.hasNext()) {
 			sl.addElement((Statement) is.next().accept(this));
@@ -123,7 +122,7 @@ public class MyVisitor implements AntlrVisitor<Object>{
 	public Object visitGoal(GoalContext ctx) {
 		MainClass m = (MainClass) ctx.mainClass().accept(this);
 		ClassDeclList cl = new ClassDeclList();
-		Iterator<ClassDeclarationContext> it = (Iterator) ctx.classDeclaration();
+		Iterator<ClassDeclarationContext> it = ctx.classDeclaration().iterator();
 		while(it.hasNext()) {
 			cl.addElement((ClassDecl) it.next().accept(this));
 		}
@@ -176,13 +175,13 @@ public class MyVisitor implements AntlrVisitor<Object>{
 	public Object visitClassDeclaration(ClassDeclarationContext ctx) {
 		Identifier i1 = (Identifier) ctx.identifier(0).accept(this);
 		
-		Iterator<VarDeclarationContext> it = (Iterator) ctx.varDeclaration().iterator();
+		Iterator<VarDeclarationContext> it = ctx.varDeclaration().iterator();
 		VarDeclList vl = new VarDeclList();
 		while(it.hasNext()) {
 			vl.addElement((VarDecl) it.next().accept(this));
 		}
 		
-		Iterator<MethodDeclarationContext> it2 = (Iterator) ctx.methodDeclaration();
+		Iterator<MethodDeclarationContext> it2 = ctx.methodDeclaration().iterator();
 		MethodDeclList ml = new MethodDeclList();
 		while(it2.hasNext()) {
 			ml.addElement((MethodDecl) it2.next().accept(this));
