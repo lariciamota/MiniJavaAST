@@ -7,6 +7,9 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
+
+import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
+
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 import br.ufpe.cin.if688.minijava.ast.And;
@@ -95,7 +98,7 @@ public class MyVisitor implements AntlrVisitor<Object>{
 		Identifier i = (Identifier) ctx.identifier(0).accept(this);
 		
 		FormalList fl = new FormalList();
-		for(int n = 0; n < ctx.identifier().size(); n++) {
+		for(int n = 1; n < ctx.identifier().size(); n++) {
 			Type ft = (Type) ctx.type(n).accept(this);
 			Identifier fi = (Identifier) ctx.identifier(n).accept(this);
 			fl.addElement(new Formal(ft, fi));
@@ -131,7 +134,7 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visitExpression(ExpressionContext ctx) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
@@ -145,8 +148,40 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visitStatement(StatementContext ctx) {
-		// TODO Auto-generated method stub
-		return null;
+		String text = ctx.getText();
+		switch(text){
+		case "{":
+			Iterator<StatementContext> i = ctx.statement().iterator();
+			StatementList sl = new StatementList();
+			while(i.hasNext()) {
+				sl.addElement((Statement) i.next().accept(this));
+			}
+			return new Block(sl);
+		case "if (":
+			Exp e = (Exp) ctx.expression(0).accept(this);
+			Statement s1 = (Statement) ctx.statement(0).accept(this);
+			Statement s2 = (Statement) ctx.statement(1).accept(this);
+			return new If(e, s1, s2);
+		case "while (":
+			Exp ex = (Exp) ctx.expression(0).accept(this);
+			Statement s = (Statement) ctx.statement(0).accept(this);
+			return new While(ex, s);
+		case "System.out.println (":
+			Exp exp = (Exp) ctx.expression(0).accept(this);
+			return new Print(exp);
+		default:
+			int size = ctx.expression().size();
+			if(size == 1){
+				Identifier id = (Identifier) ctx.identifier().accept(this);
+				Exp expr = (Exp) ctx.expression(0).accept(this);
+				return new Assign(id, expr);
+			} else {
+				Identifier id2 = (Identifier) ctx.identifier().accept(this);
+				Exp exp1 = (Exp) ctx.expression(0).accept(this);
+				Exp exp2 = (Exp) ctx.expression(1).accept(this);
+				return new ArrayAssign(id2, exp1, exp2);
+			}
+		}
 	}
 
 	@Override
