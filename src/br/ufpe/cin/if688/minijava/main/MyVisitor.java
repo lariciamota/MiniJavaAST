@@ -136,25 +136,24 @@ public class MyVisitor implements AntlrVisitor<Object>{
 	@Override
 	public Object visitExpression(ExpressionContext ctx) {
 		String text = ctx.getText();
-		switch(text){
-		case "(":
+		if(text.contains("(")){
 			return ctx.expression(0).accept(this);
-		case "!":
+		} else if(text.contains("!")){
 			Exp e = (Exp) ctx.expression(0).accept(this);
 			return new Not(e);
-		case "new int [":
+		} else if(text.contains("new int [")){
 			Exp exp = (Exp) ctx.expression(0).accept(this);
 			return new NewArray(exp);
-		case "new":
+		} else if(text.contains("new")){
 			Identifier id = (Identifier) ctx.identifier().accept(this);
 			return new NewObject(id);
-		case "this":
+		} else if(text.contains("this")){
 			return new This();
-		case "false":
+		} else if(text.contains("false")){
 			return new False();
-		case "true":
+		} else if(text.contains("true")){
 			return new True();
-		default:
+		} else {
 			int size = ctx.expression().size();
 			if(size == 0){
 				if (('1' <= text.charAt(0)) && (text.charAt(0) <= '9')) {
@@ -191,10 +190,11 @@ public class MyVisitor implements AntlrVisitor<Object>{
 					}
 					return new Call(exp1, i, el);
 				}
-			} 
-		}
-		
+			}
+		}						
+			 
 	}
+		
 
 	@Override
 	public Object visitMainClass(MainClassContext ctx) {
@@ -207,27 +207,26 @@ public class MyVisitor implements AntlrVisitor<Object>{
 	@Override
 	public Object visitStatement(StatementContext ctx) {
 		String text = ctx.getText();
-		switch(text){
-		case "{":
+		if(text.contains("{")){
 			Iterator<StatementContext> i = ctx.statement().iterator();
 			StatementList sl = new StatementList();
 			while(i.hasNext()) {
 				sl.addElement((Statement) i.next().accept(this));
 			}
 			return new Block(sl);
-		case "if (":
+		} else if(text.contains("if (")){
 			Exp e = (Exp) ctx.expression(0).accept(this);
 			Statement s1 = (Statement) ctx.statement(0).accept(this);
 			Statement s2 = (Statement) ctx.statement(1).accept(this);
 			return new If(e, s1, s2);
-		case "while (":
+		} else if(text.contains("while (")){
 			Exp ex = (Exp) ctx.expression(0).accept(this);
 			Statement s = (Statement) ctx.statement(0).accept(this);
 			return new While(ex, s);
-		case "System.out.println (":
+		} else if(text.contains("System.out.println (")){
 			Exp exp = (Exp) ctx.expression(0).accept(this);
 			return new Print(exp);
-		default:
+		} else {
 			int size = ctx.expression().size();
 			if(size == 1){
 				Identifier id = (Identifier) ctx.identifier().accept(this);
@@ -239,17 +238,18 @@ public class MyVisitor implements AntlrVisitor<Object>{
 				Exp exp2 = (Exp) ctx.expression(1).accept(this);
 				return new ArrayAssign(id2, exp1, exp2);
 			}
-		}
+		}		
 	}
+	
 
 	@Override
 	public Object visitType(TypeContext ctx) {
 		String type = ctx.getText();
-		if(type.equals("int []")){
+		if(type.contains("[")){
 			return new IntArrayType();
-		} else if (type.equals("boolean")){
+		} else if (type.contains("boolean")){
 			return new BooleanType();
-		} else if (type.equals("int")){
+		} else if (type.contains("int")){
 			return new IntegerType();
 		} else {
 			return new IdentifierType(type);
