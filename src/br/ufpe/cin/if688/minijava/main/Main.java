@@ -24,10 +24,10 @@ public class Main {
 		AntlrLexer lexer = new AntlrLexer(input);
 		CommonTokenStream token = new CommonTokenStream(lexer);
 		
-		Program p = (Program) new MyVisitor().visit(new AntlrParser(token).goal());
-		
+		Program prog = (Program) new MyVisitor().visit(new AntlrParser(token).goal());
 		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
-		ppv.visit(p);
+		ppv.visit(prog);
+		System.out.println("done");
 	}
 
 }

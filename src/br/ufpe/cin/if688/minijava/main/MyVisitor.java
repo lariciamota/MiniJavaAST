@@ -69,7 +69,7 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visit(ParseTree arg0) {
-		return null;
+		return arg0.accept(this);
 	}
 
 	@Override
