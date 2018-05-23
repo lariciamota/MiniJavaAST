@@ -36,7 +36,7 @@ expression 			: expression ( '&&' | '<' | '+' | '-' | '*' ) expression
 
 identifier 			: IDENTIFIER;
 
-INTEGER_LITERAL				: [0-9];
+INTEGER_LITERAL				: [0]|[1-9][0-9]*;
 IDENTIFIER					: ([A-Z]|[a-z])([A-Z]|[a-z]|[0-9]*|[_])*;
 COMMENT_SINGLE_LINE			: [\/][\/](.)*? -> skip;
 COMMENT_MULTI_LINE			: [\/][\*]([^\*]|([\*]+([^\*\/])))*([\*]+[\/]) -> skip;
