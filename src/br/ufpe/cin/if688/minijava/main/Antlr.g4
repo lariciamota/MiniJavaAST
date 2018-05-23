@@ -24,7 +24,7 @@ expression 			: expression ( '&&' | '<' | '+' | '-' | '*' ) expression
 						| expression '[' expression ']'
 						| expression '.' 'length'
 						| expression '.' identifier '(' ( expression ( ',' expression )* )? ')'
-						| INTEGER_LITERAL
+						| integer
 						| 'true'
 						| 'false'
 						| identifier
@@ -35,11 +35,12 @@ expression 			: expression ( '&&' | '<' | '+' | '-' | '*' ) expression
 						| '(' expression ')';
 
 identifier 			: IDENTIFIER;
+integer				: INTEGER_LITERAL;
 
 INTEGER_LITERAL				: [0]|[1-9][0-9]*;
-IDENTIFIER					: ([A-Z]|[a-z])([A-Z]|[a-z]|[0-9]*|[_])*;
-COMMENT_SINGLE_LINE			: [\/][\/](.)*? -> skip;
-COMMENT_MULTI_LINE			: [\/][\*]([^\*]|([\*]+([^\*\/])))*([\*]+[\/]) -> skip;
+IDENTIFIER					: [A-Za-z]([A-Za-z0-9]|[_])*;
+COMMENT_SINGLE_LINE			: '//'(.)*? -> skip;
+COMMENT_MULTI_LINE			: '/*' (.)*? '*/' -> skip;
 WHITESPACE					: [ \t\r\n\f] -> skip;
 
 

@@ -50,6 +50,12 @@ public interface AntlrVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitStatement(@NotNull AntlrParser.StatementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link AntlrParser#integer}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInteger(@NotNull AntlrParser.IntegerContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link AntlrParser#type}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

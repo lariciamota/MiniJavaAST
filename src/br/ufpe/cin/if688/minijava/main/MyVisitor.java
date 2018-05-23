@@ -60,6 +60,7 @@ import br.ufpe.cin.if688.minijava.main.AntlrParser.ClassDeclarationContext;
 import br.ufpe.cin.if688.minijava.main.AntlrParser.ExpressionContext;
 import br.ufpe.cin.if688.minijava.main.AntlrParser.GoalContext;
 import br.ufpe.cin.if688.minijava.main.AntlrParser.IdentifierContext;
+import br.ufpe.cin.if688.minijava.main.AntlrParser.IntegerContext;
 import br.ufpe.cin.if688.minijava.main.AntlrParser.MainClassContext;
 import br.ufpe.cin.if688.minijava.main.AntlrParser.MethodDeclarationContext;
 import br.ufpe.cin.if688.minijava.main.AntlrParser.StatementContext;
@@ -214,16 +215,16 @@ public class MyVisitor implements AntlrVisitor<Object>{
 				sl.addElement((Statement) i.next().accept(this));
 			}
 			return new Block(sl);
-		} else if(text.contains("if (")){
+		} else if(text.contains("if")){
 			Exp e = (Exp) ctx.expression(0).accept(this);
 			Statement s1 = (Statement) ctx.statement(0).accept(this);
 			Statement s2 = (Statement) ctx.statement(1).accept(this);
 			return new If(e, s1, s2);
-		} else if(text.contains("while (")){
+		} else if(text.contains("while")){
 			Exp ex = (Exp) ctx.expression(0).accept(this);
 			Statement s = (Statement) ctx.statement(0).accept(this);
 			return new While(ex, s);
-		} else if(text.contains("System.out.println (")){
+		} else if(text.contains("System.out.println")){
 			Exp exp = (Exp) ctx.expression(0).accept(this);
 			return new Print(exp);
 		} else {
@@ -279,11 +280,17 @@ public class MyVisitor implements AntlrVisitor<Object>{
 		while(it2.hasNext()) {
 			ml.addElement((MethodDecl) it2.next().accept(this));
 		}
-		if( ctx.identifier(1) != null) {
+		if( ctx.identifier().size() > 1) {
 			Identifier i2 = (Identifier) ctx.identifier(1).accept(this);
 			return new ClassDeclExtends(i1, i2, vl, ml);
 		}
 		return new ClassDeclSimple(i1, vl, ml);
+	}
+
+	@Override
+	public Object visitInteger(IntegerContext ctx) {
+		String text = ctx.getText();
+		return new IntegerLiteral(Integer.parseInt(text));
 	}
 
 }
