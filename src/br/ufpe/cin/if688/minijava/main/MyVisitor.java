@@ -22,6 +22,7 @@ import br.ufpe.cin.if688.minijava.ast.ClassDeclExtends;
 import br.ufpe.cin.if688.minijava.ast.ClassDeclList;
 import br.ufpe.cin.if688.minijava.ast.ClassDeclSimple;
 import br.ufpe.cin.if688.minijava.ast.Exp;
+import br.ufpe.cin.if688.minijava.ast.ExpList;
 import br.ufpe.cin.if688.minijava.ast.False;
 import br.ufpe.cin.if688.minijava.ast.Formal;
 import br.ufpe.cin.if688.minijava.ast.FormalList;
@@ -132,7 +133,40 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visitExpression(ExpressionContext ctx) {
-		// TODO Auto-generated method stub
+		ExpList el = (ExpList) ctx.expression();
+		switch(el.size()) {
+		case 0:
+			if(!ctx.identifier().equals(null)) {
+				return (Identifier) ctx.identifier().accept(this);
+			}
+			String s = ctx.getText();
+			switch(s) {
+			case "true":
+				return new True();
+			case "false":
+				return new False();
+			case "this":
+				return new This();
+			default:
+				int x = Integer.parseInt(s);
+				return new IntegerLiteral(x);
+				
+			}
+			break;
+		case 1:
+			Exp e = (Exp) el.elementAt(0).accept(this);
+			
+			break;
+		case 2:
+			break;
+		default:
+			break;
+		}
+		Iterator<ExpressionContext> it = (Iterator) ctx.expression();
+		while(it.hasNext()) {
+			el.addElement((Exp) it.next().accept(this));
+		}
+		
 		return null;
 	}
 
