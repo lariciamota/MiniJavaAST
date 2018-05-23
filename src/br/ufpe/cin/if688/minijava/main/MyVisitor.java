@@ -138,7 +138,7 @@ public class MyVisitor implements AntlrVisitor<Object>{
 		String text = ctx.getText();
 		switch(text){
 		case "(":
-			
+			return ctx.expression(0).accept(this);
 		case "!":
 			Exp e = (Exp) ctx.expression(0).accept(this);
 			return new Not(e);
@@ -166,7 +166,7 @@ public class MyVisitor implements AntlrVisitor<Object>{
 			} else if (size == 1){
 				Exp exp1 = (Exp) ctx.expression(0).accept(this);
 				return new ArrayLength(exp1);
-			} else if (size == 2){
+			} else {
 				Exp e1 = (Exp) ctx.expression(0).accept(this);
 				Exp e2 = (Exp) ctx.expression(1).accept(this);
 				if(text.contains("&&")){
@@ -181,20 +181,19 @@ public class MyVisitor implements AntlrVisitor<Object>{
 					return new Times(e1, e2);
 				} else if(text.contains("[")){
 					return new ArrayLookup(e1, e2);
+				} else {
+					Exp exp1 = (Exp) ctx.expression(0).accept(this);
+					Identifier i = (Identifier) ctx.identifier().accept(this);
+					
+					ExpList el = new ExpList();
+					for(int n = 1; n < ctx.expression().size(); n++) {
+						el.addElement((Exp) ctx.expression(n).accept(this));
+					}
+					return new Call(exp1, i, el);
 				}
-			} else {
-				Exp e1 = (Exp) ctx.expression(0).accept(this);
-				Identifier i = (Identifier) ctx.identifier().accept(this);
-				
-				ExpList el = new ExpList();
-				for(int n = 1; n < ctx.expression().size(); n++) {
-					el.addElement((Exp) ctx.expression(n).accept(this));
-				}
-				return new Call(e1, i, el);
-			}
+			} 
 		}
-		//INTEGER
-		return null;
+		
 	}
 
 	@Override
