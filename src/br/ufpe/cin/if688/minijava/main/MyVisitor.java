@@ -91,13 +91,6 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visitMethodDeclaration(MethodDeclarationContext ctx) {
-		/*methodDeclaration: 'public' type identifier '(' ( type identifier ( ',' type identifier )* )? ')' '{' ( varDeclaration )* ( statement )* 'return' expression ';' '}' 
-		 type identifier 
-		 ((type identifier)*)
-		 varDeclaration *
-		 Statement *
-		 Expression
-		 */
 		Type t = (Type) ctx.type(0).accept(this);
 		Identifier i = (Identifier) ctx.identifier(0).accept(this);
 		boolean first = true;
