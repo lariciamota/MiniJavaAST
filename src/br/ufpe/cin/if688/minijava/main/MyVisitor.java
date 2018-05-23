@@ -7,6 +7,9 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
+
+import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
+
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 import br.ufpe.cin.if688.minijava.ast.And;
@@ -94,22 +97,21 @@ public class MyVisitor implements AntlrVisitor<Object>{
 	public Object visitMethodDeclaration(MethodDeclarationContext ctx) {
 		Type t = (Type) ctx.type(0).accept(this);
 		Identifier i = (Identifier) ctx.identifier(0).accept(this);
-		boolean first = true;
 		
 		FormalList fl = new FormalList();
-		for(int n = 0; n < ctx.identifier().size(); n++) {
+		for(int n = 1; n < ctx.identifier().size(); n++) {
 			Type ft = (Type) ctx.type(n).accept(this);
 			Identifier fi = (Identifier) ctx.identifier(n).accept(this);
 			fl.addElement(new Formal(ft, fi));
 		}
 		
-		Iterator<VarDeclarationContext> iv = (Iterator) ctx.varDeclaration().iterator();
+		Iterator<VarDeclarationContext> iv = ctx.varDeclaration().iterator();
 		VarDeclList vl = new VarDeclList();
 		while(iv.hasNext()) {
 			vl.addElement((VarDecl) iv.next().accept(this));
 		}
 		
-		Iterator<StatementContext> is = (Iterator) ctx.varDeclaration().iterator();
+		Iterator<StatementContext> is = ctx.statement().iterator();
 		StatementList sl = new StatementList();
 		while(is.hasNext()) {
 			sl.addElement((Statement) is.next().accept(this));
@@ -124,7 +126,7 @@ public class MyVisitor implements AntlrVisitor<Object>{
 	public Object visitGoal(GoalContext ctx) {
 		MainClass m = (MainClass) ctx.mainClass().accept(this);
 		ClassDeclList cl = new ClassDeclList();
-		Iterator<ClassDeclarationContext> it = (Iterator) ctx.classDeclaration();
+		Iterator<ClassDeclarationContext> it = ctx.classDeclaration().iterator();
 		while(it.hasNext()) {
 			cl.addElement((ClassDecl) it.next().accept(this));
 		}
@@ -133,40 +135,60 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visitExpression(ExpressionContext ctx) {
-		ExpList el = (ExpList) ctx.expression();
-		switch(el.size()) {
-		case 0:
-			if(!ctx.identifier().equals(null)) {
-				return (Identifier) ctx.identifier().accept(this);
-			}
-			String s = ctx.getText();
-			switch(s) {
-			case "true":
-				return new True();
-			case "false":
-				return new False();
-			case "this":
-				return new This();
-			default:
-				int x = Integer.parseInt(s);
-				return new IntegerLiteral(x);
-				
-			}
-			break;
-		case 1:
-			Exp e = (Exp) el.elementAt(0).accept(this);
+		String text = ctx.getText();
+		switch(text){
+		case "(":
 			
-			break;
-		case 2:
-			break;
+		case "!":
+			Exp e = (Exp) ctx.expression(0).accept(this);
+			return new Not(e);
+		case "new int [":
+			Exp exp = (Exp) ctx.expression(0).accept(this);
+			return new NewArray(exp);
+		case "new":
+			Identifier id = (Identifier) ctx.identifier().accept(this);
+			return new NewObject(id);
+		case "this":
+			return new This();
+		case "false":
+			return new False();
+		case "true":
+			return new True();
 		default:
-			break;
+			int size = ctx.expression().size();
+			if(size == 0){
+				return ctx.identifier().accept(this);
+			} else if (size == 1){
+				Exp exp1 = (Exp) ctx.expression(0).accept(this);
+				return new ArrayLength(exp1);
+			} else if (size == 2){
+				Exp e1 = (Exp) ctx.expression(0).accept(this);
+				Exp e2 = (Exp) ctx.expression(1).accept(this);
+				if(text.contains("&&")){
+					return new And(e1, e2);
+				} else if(text.contains("<")){
+					return new LessThan(e1, e2);
+				} else if(text.contains("+")){
+					return new Plus(e1, e2);
+				} else if(text.contains("-")){
+					return new Minus(e1, e2);
+				} else if(text.contains("*")){
+					return new Times(e1, e2);
+				} else if(text.contains("[")){
+					return new ArrayLookup(e1, e2);
+				}
+			} else {
+				Exp e1 = (Exp) ctx.expression(0).accept(this);
+				Identifier i = (Identifier) ctx.identifier().accept(this);
+				
+				ExpList el = new ExpList();
+				for(int n = 1; n < ctx.expression().size(); n++) {
+					el.addElement((Exp) ctx.expression(n).accept(this));
+				}
+				return new Call(e1, i, el);
+			}
 		}
-		Iterator<ExpressionContext> it = (Iterator) ctx.expression();
-		while(it.hasNext()) {
-			el.addElement((Exp) it.next().accept(this));
-		}
-		
+		//INTEGER
 		return null;
 	}
 
@@ -180,8 +202,40 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visitStatement(StatementContext ctx) {
-		// TODO Auto-generated method stub
-		return null;
+		String text = ctx.getText();
+		switch(text){
+		case "{":
+			Iterator<StatementContext> i = ctx.statement().iterator();
+			StatementList sl = new StatementList();
+			while(i.hasNext()) {
+				sl.addElement((Statement) i.next().accept(this));
+			}
+			return new Block(sl);
+		case "if (":
+			Exp e = (Exp) ctx.expression(0).accept(this);
+			Statement s1 = (Statement) ctx.statement(0).accept(this);
+			Statement s2 = (Statement) ctx.statement(1).accept(this);
+			return new If(e, s1, s2);
+		case "while (":
+			Exp ex = (Exp) ctx.expression(0).accept(this);
+			Statement s = (Statement) ctx.statement(0).accept(this);
+			return new While(ex, s);
+		case "System.out.println (":
+			Exp exp = (Exp) ctx.expression(0).accept(this);
+			return new Print(exp);
+		default:
+			int size = ctx.expression().size();
+			if(size == 1){
+				Identifier id = (Identifier) ctx.identifier().accept(this);
+				Exp expr = (Exp) ctx.expression(0).accept(this);
+				return new Assign(id, expr);
+			} else {
+				Identifier id2 = (Identifier) ctx.identifier().accept(this);
+				Exp exp1 = (Exp) ctx.expression(0).accept(this);
+				Exp exp2 = (Exp) ctx.expression(1).accept(this);
+				return new ArrayAssign(id2, exp1, exp2);
+			}
+		}
 	}
 
 	@Override
@@ -210,13 +264,13 @@ public class MyVisitor implements AntlrVisitor<Object>{
 	public Object visitClassDeclaration(ClassDeclarationContext ctx) {
 		Identifier i1 = (Identifier) ctx.identifier(0).accept(this);
 		
-		Iterator<VarDeclarationContext> it = (Iterator) ctx.varDeclaration().iterator();
+		Iterator<VarDeclarationContext> it = ctx.varDeclaration().iterator();
 		VarDeclList vl = new VarDeclList();
 		while(it.hasNext()) {
 			vl.addElement((VarDecl) it.next().accept(this));
 		}
 		
-		Iterator<MethodDeclarationContext> it2 = (Iterator) ctx.methodDeclaration();
+		Iterator<MethodDeclarationContext> it2 = ctx.methodDeclaration().iterator();
 		MethodDeclList ml = new MethodDeclList();
 		while(it2.hasNext()) {
 			ml.addElement((MethodDecl) it2.next().accept(this));
