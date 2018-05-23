@@ -25,6 +25,7 @@ import br.ufpe.cin.if688.minijava.ast.ClassDeclExtends;
 import br.ufpe.cin.if688.minijava.ast.ClassDeclList;
 import br.ufpe.cin.if688.minijava.ast.ClassDeclSimple;
 import br.ufpe.cin.if688.minijava.ast.Exp;
+import br.ufpe.cin.if688.minijava.ast.ExpList;
 import br.ufpe.cin.if688.minijava.ast.False;
 import br.ufpe.cin.if688.minijava.ast.Formal;
 import br.ufpe.cin.if688.minijava.ast.FormalList;
@@ -134,7 +135,60 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visitExpression(ExpressionContext ctx) {
-		
+		String text = ctx.getText();
+		switch(text){
+		case "(":
+			
+		case "!":
+			Exp e = (Exp) ctx.expression(0).accept(this);
+			return new Not(e);
+		case "new int [":
+			Exp exp = (Exp) ctx.expression(0).accept(this);
+			return new NewArray(exp);
+		case "new":
+			Identifier id = (Identifier) ctx.identifier().accept(this);
+			return new NewObject(id);
+		case "this":
+			return new This();
+		case "false":
+			return new False();
+		case "true":
+			return new True();
+		default:
+			int size = ctx.expression().size();
+			if(size == 0){
+				return ctx.identifier().accept(this);
+			} else if (size == 1){
+				Exp exp1 = (Exp) ctx.expression(0).accept(this);
+				return new ArrayLength(exp1);
+			} else if (size == 2){
+				Exp e1 = (Exp) ctx.expression(0).accept(this);
+				Exp e2 = (Exp) ctx.expression(1).accept(this);
+				if(text.contains("&&")){
+					return new And(e1, e2);
+				} else if(text.contains("<")){
+					return new LessThan(e1, e2);
+				} else if(text.contains("+")){
+					return new Plus(e1, e2);
+				} else if(text.contains("-")){
+					return new Minus(e1, e2);
+				} else if(text.contains("*")){
+					return new Times(e1, e2);
+				} else if(text.contains("[")){
+					return new ArrayLookup(e1, e2);
+				}
+			} else {
+				Exp e1 = (Exp) ctx.expression(0).accept(this);
+				Identifier i = (Identifier) ctx.identifier().accept(this);
+				
+				ExpList el = new ExpList();
+				for(int n = 1; n < ctx.expression().size(); n++) {
+					el.addElement((Exp) ctx.expression(n).accept(this));
+				}
+				return new Call(e1, i, el);
+			}
+		}
+		//INTEGER
 		return null;
 	}
 
