@@ -157,7 +157,12 @@ public class MyVisitor implements AntlrVisitor<Object>{
 		default:
 			int size = ctx.expression().size();
 			if(size == 0){
-				return ctx.identifier().accept(this);
+				if (('1' <= text.charAt(0)) && (text.charAt(0) <= '9')) {
+					int num = Integer.parseInt(text);
+					return new IntegerLiteral(num);
+				} else {
+					return ctx.identifier().accept(this);
+				}
 			} else if (size == 1){
 				Exp exp1 = (Exp) ctx.expression(0).accept(this);
 				return new ArrayLength(exp1);
