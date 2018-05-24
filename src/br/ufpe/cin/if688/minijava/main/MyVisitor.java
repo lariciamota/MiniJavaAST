@@ -165,7 +165,7 @@ public class MyVisitor implements AntlrVisitor<Object>{
 				if('0'<= text.charAt(0) && text.charAt(0) <= '9') {
 					return ctx.integer().accept(this);
 				} else {
-					return ctx.identifier().accept(this);
+					return new IdentifierExp( ctx.getText());
 				}
 			} else {
 				if(ctx.getChild(0) instanceof ExpressionContext){
@@ -193,7 +193,7 @@ public class MyVisitor implements AntlrVisitor<Object>{
 					case ".":
 						String txt3 = ctx.getChild(2).getText();
 						if(txt3.equals("length")) {
-							//Exp exp1 = (Exp) ctx.expression(0).accept(this);
+							Exp exp1 = (Exp) ctx.expression(0).accept(this);
 							return new ArrayLength(e1);
 						} else {
 							Exp exp1 = (Exp) ctx.expression(0).accept(this);
