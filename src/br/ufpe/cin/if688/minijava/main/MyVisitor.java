@@ -160,12 +160,10 @@ public class MyVisitor implements AntlrVisitor<Object>{
 			}
 		default:
 			if(ctx.children.size() == 1) {
-				if('0'<= text.charAt(0) && text.charAt(0) <= '9') {
+				if('1'<= text.charAt(0) && text.charAt(0) <= '9') {
 					return ctx.integer().accept(this);
 				} else {
-					System.out.println("id");
-					Identifier id = (Identifier) ctx.identifier().accept(this);
-					return new IdentifierExp(id.toString());
+					return ctx.identifier().accept(this);
 				}
 			} else {
 				String txt2 = ctx.children.get(1).getText();
@@ -304,9 +302,3 @@ public class MyVisitor implements AntlrVisitor<Object>{
 	}
 
 }
-
-
-
-
-
-
