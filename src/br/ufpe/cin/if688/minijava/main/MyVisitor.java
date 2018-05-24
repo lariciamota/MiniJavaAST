@@ -144,8 +144,6 @@ public class MyVisitor implements AntlrVisitor<Object>{
 		case ("!"):
 			Exp e = (Exp) ctx.expression(0).accept(this);
 			return new Not(e);
-		case ("this"):
-			return new This();
 		case ("false"):
 			return new False();
 		case ("true"):
@@ -192,7 +190,6 @@ public class MyVisitor implements AntlrVisitor<Object>{
 					case ".":
 						String txt3 = ctx.getChild(2).getText();
 						if(txt3.equals("length")) {
-							Exp exp1 = (Exp) ctx.expression(0).accept(this);
 							return new ArrayLength(e1);
 						} else {
 							Exp exp1 = (Exp) ctx.expression(0).accept(this);
@@ -204,6 +201,8 @@ public class MyVisitor implements AntlrVisitor<Object>{
 							}
 							return new Call(exp1, i, el);
 						}
+					default:
+						return new This();
 					}
 				}
 				
