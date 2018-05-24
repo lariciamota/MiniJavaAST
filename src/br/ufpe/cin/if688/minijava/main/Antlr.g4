@@ -39,7 +39,7 @@ integer				: INTEGER_LITERAL;
 
 INTEGER_LITERAL				: [0]|[1-9][0-9]*;
 IDENTIFIER					: [A-Za-z]([A-Za-z0-9]|[_])*;
-COMMENT_SINGLE_LINE			: '//'(.)*? -> skip;
+COMMENT_SINGLE_LINE			: '//'(.)*? [\n] -> skip;
 COMMENT_MULTI_LINE			: '/*' (.)*? '*/' -> skip;
 WHITESPACE					: [ \t\r\n\f] -> skip;
 
