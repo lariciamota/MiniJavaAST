@@ -136,30 +136,29 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visitExpression(ExpressionContext ctx) {
-		String text = ctx.getText();
-		if(text.contains("(")){
+		String text = ctx.getStart().getText();
+		if(text.equals("(")){
 			return ctx.expression(0).accept(this);
-		} else if(text.contains("!")){
+		} else if(text.equals("!")){
 			Exp e = (Exp) ctx.expression(0).accept(this);
 			return new Not(e);
-		} else if(text.contains("new int [")){
+		} else if(text.equals("new int [")){
 			Exp exp = (Exp) ctx.expression(0).accept(this);
 			return new NewArray(exp);
-		} else if(text.contains("new")){
+		} else if(text.equals("new")){
 			Identifier id = (Identifier) ctx.identifier().accept(this);
 			return new NewObject(id);
-		} else if(text.contains("this")){
+		} else if(text.equals("this")){
 			return new This();
-		} else if(text.contains("false")){
+		} else if(text.equals("false")){
 			return new False();
-		} else if(text.contains("true")){
+		} else if(text.equals("true")){
 			return new True();
 		} else {
 			int size = ctx.expression().size();
 			if(size == 0){
-				if (('1' <= text.charAt(0)) && (text.charAt(0) <= '9')) {
-					int num = Integer.parseInt(text);
-					return new IntegerLiteral(num);
+				if (text.matches("\\d+")) {
+					return ctx.integer().accept(this);
 				} else {
 					return ctx.identifier().accept(this);
 				}
@@ -167,19 +166,20 @@ public class MyVisitor implements AntlrVisitor<Object>{
 				Exp exp1 = (Exp) ctx.expression(0).accept(this);
 				return new ArrayLength(exp1);
 			} else {
+				text = ctx.getChild(1).getText();
 				Exp e1 = (Exp) ctx.expression(0).accept(this);
 				Exp e2 = (Exp) ctx.expression(1).accept(this);
-				if(text.contains("&&")){
+				if(text.equals("&&")){
 					return new And(e1, e2);
-				} else if(text.contains("<")){
+				} else if(text.equals("<")){
 					return new LessThan(e1, e2);
-				} else if(text.contains("+")){
+				} else if(text.equals("+")){
 					return new Plus(e1, e2);
-				} else if(text.contains("-")){
+				} else if(text.equals("-")){
 					return new Minus(e1, e2);
-				} else if(text.contains("*")){
+				} else if(text.equals("*")){
 					return new Times(e1, e2);
-				} else if(text.contains("[")){
+				} else if(text.equals("[")){
 					return new ArrayLookup(e1, e2);
 				} else {
 					Exp exp1 = (Exp) ctx.expression(0).accept(this);
