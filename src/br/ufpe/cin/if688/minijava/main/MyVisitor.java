@@ -116,7 +116,6 @@ public class MyVisitor implements AntlrVisitor<Object>{
 		StatementList sl = new StatementList();
 		while(is.hasNext()) {
 			StatementContext n = is.next();
-			System.out.println(n.getText()+'\n');
 			sl.addElement((Statement) n.accept(this));
 		}
 		
