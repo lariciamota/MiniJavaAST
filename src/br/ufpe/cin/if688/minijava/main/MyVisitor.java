@@ -115,7 +115,9 @@ public class MyVisitor implements AntlrVisitor<Object>{
 		Iterator<StatementContext> is = ctx.statement().iterator();
 		StatementList sl = new StatementList();
 		while(is.hasNext()) {
-			sl.addElement((Statement) is.next().accept(this));
+			StatementContext n = is.next();
+			System.out.println(n.getText()+'\n');
+			sl.addElement((Statement) n.accept(this));
 		}
 		
 		
@@ -136,7 +138,7 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visitExpression(ExpressionContext ctx) {
-		String text = ctx.getStart().getText();
+		String text = ctx.getChild(0).getText();
 		switch (text) {
 		case ("("):
 			return ctx.expression(0).accept(this);
@@ -150,7 +152,7 @@ public class MyVisitor implements AntlrVisitor<Object>{
 		case ("true"):
 			return new True();
 		case ("new"):
-			String text2 = ctx.children.get(1).getText();
+			String text2 = ctx.getChild(1).getText();
 			if(text2.equals("int")) {
 				Exp exp = (Exp) ctx.expression(0).accept(this);
 				return new NewArray(exp);
@@ -159,45 +161,53 @@ public class MyVisitor implements AntlrVisitor<Object>{
 				return new NewObject(id);
 			}
 		default:
-			if(ctx.children.size() == 1) {
-				if('1'<= text.charAt(0) && text.charAt(0) <= '9') {
+			if(ctx.getChildCount() == 1) {
+				if('0'<= text.charAt(0) && text.charAt(0) <= '9') {
 					return ctx.integer().accept(this);
 				} else {
 					return ctx.identifier().accept(this);
 				}
 			} else {
-				String txt2 = ctx.children.get(1).getText();
-				Exp e1 = (Exp) ctx.expression(0).accept(this);
-				Exp e2 = (Exp) ctx.expression(1).accept(this);
-				switch (txt2) {
-				case "&&":
-					return new And(e1, e2);
-				case "<":
-					return new LessThan(e1, e2);
-				case "+":
-					return new Plus(e1, e2);
-				case "-":
-					return new Minus(e1, e2);
-				case "*":
-					return new Times(e1, e2);
-				case "[":
-					return new ArrayLookup(e1, e2);
-				case ".":
-					String txt3 = ctx.children.get(2).getText();
-					if(txt3.equals("length")) {
-						Exp exp1 = (Exp) ctx.expression(0).accept(this);
-						return new ArrayLength(exp1);
-					} else {
-						Exp exp1 = (Exp) ctx.expression(0).accept(this);
-						Identifier i = (Identifier) ctx.identifier().accept(this);
-						
-						ExpList el = new ExpList();
-						for(int n = 1; n < ctx.expression().size(); n++) {
-							el.addElement((Exp) ctx.expression(n).accept(this));
+				if(ctx.getChild(0) instanceof ExpressionContext){
+					String txt2 = ctx.getChild(1).getText();
+					Exp e1 = (Exp) ctx.expression(0).accept(this);
+					switch (txt2) {
+					case "&&":
+						Exp e2 = (Exp) ctx.expression(1).accept(this);
+						return new And(e1, e2);
+					case "<":
+						Exp e3 = (Exp) ctx.expression(1).accept(this);
+						return new LessThan(e1, e3);
+					case "+":
+						Exp e4 = (Exp) ctx.expression(1).accept(this);
+						return new Plus(e1, e4);
+					case "-":
+						Exp e5 = (Exp) ctx.expression(1).accept(this);
+						return new Minus(e1, e5);
+					case "*":
+						Exp e6 = (Exp) ctx.expression(1).accept(this);
+						return new Times(e1, e6);
+					case "[":
+						Exp e7 = (Exp) ctx.expression(1).accept(this);
+						return new ArrayLookup(e1, e7);
+					case ".":
+						String txt3 = ctx.getChild(2).getText();
+						if(txt3.equals("length")) {
+							//Exp exp1 = (Exp) ctx.expression(0).accept(this);
+							return new ArrayLength(e1);
+						} else {
+							Exp exp1 = (Exp) ctx.expression(0).accept(this);
+							Identifier i = (Identifier) ctx.identifier().accept(this);
+							
+							ExpList el = new ExpList();
+							for(int n = 1; n < ctx.expression().size(); n++) {
+								el.addElement((Exp) ctx.expression(n).accept(this));
+							}
+							return new Call(exp1, i, el);
 						}
-						return new Call(exp1, i, el);
 					}
 				}
+				
 			}
 		}
 		
