@@ -27,7 +27,6 @@ public class Main {
 		Program prog = (Program) new MyVisitor().visit(new AntlrParser(token).goal());
 		PrettyPrintVisitor ppv = new PrettyPrintVisitor();
 		ppv.visit(prog);
-		System.out.println("done");
 	}
 
 }

@@ -136,64 +136,74 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visitExpression(ExpressionContext ctx) {
-		String text = ctx.getText();
-		if(text.contains("(")){
+		String text = ctx.getStart().getText();
+		switch (text) {
+		case ("("):
 			return ctx.expression(0).accept(this);
-		} else if(text.contains("!")){
+		case ("!"):
 			Exp e = (Exp) ctx.expression(0).accept(this);
 			return new Not(e);
-		} else if(text.contains("new int [")){
-			Exp exp = (Exp) ctx.expression(0).accept(this);
-			return new NewArray(exp);
-		} else if(text.contains("new")){
-			Identifier id = (Identifier) ctx.identifier().accept(this);
-			return new NewObject(id);
-		} else if(text.contains("this")){
+		case ("this"):
 			return new This();
-		} else if(text.contains("false")){
+		case ("false"):
 			return new False();
-		} else if(text.contains("true")){
+		case ("true"):
 			return new True();
-		} else {
-			int size = ctx.expression().size();
-			if(size == 0){
-				if (('1' <= text.charAt(0)) && (text.charAt(0) <= '9')) {
-					int num = Integer.parseInt(text);
-					return new IntegerLiteral(num);
-				} else {
-					return ctx.identifier().accept(this);
-				}
-			} else if (size == 1){
-				Exp exp1 = (Exp) ctx.expression(0).accept(this);
-				return new ArrayLength(exp1);
+		case ("new"):
+			String text2 = ctx.children.get(1).getText();
+			if(text2.equals("int")) {
+				Exp exp = (Exp) ctx.expression(0).accept(this);
+				return new NewArray(exp);
 			} else {
+				Identifier id = (Identifier) ctx.identifier().accept(this);
+				return new NewObject(id);
+			}
+		default:
+			if(ctx.children.size() == 1) {
+				if('0'<= text.charAt(0) && text.charAt(0) <= '9') {
+					return ctx.integer().accept(this);
+				} else {
+					System.out.println("id");
+					Identifier id = (Identifier) ctx.identifier().accept(this);
+					return new IdentifierExp(id.toString());
+				}
+			} else {
+				String txt2 = ctx.children.get(1).getText();
 				Exp e1 = (Exp) ctx.expression(0).accept(this);
 				Exp e2 = (Exp) ctx.expression(1).accept(this);
-				if(text.contains("&&")){
+				switch (txt2) {
+				case "&&":
 					return new And(e1, e2);
-				} else if(text.contains("<")){
+				case "<":
 					return new LessThan(e1, e2);
-				} else if(text.contains("+")){
+				case "+":
 					return new Plus(e1, e2);
-				} else if(text.contains("-")){
+				case "-":
 					return new Minus(e1, e2);
-				} else if(text.contains("*")){
+				case "*":
 					return new Times(e1, e2);
-				} else if(text.contains("[")){
+				case "[":
 					return new ArrayLookup(e1, e2);
-				} else {
-					Exp exp1 = (Exp) ctx.expression(0).accept(this);
-					Identifier i = (Identifier) ctx.identifier().accept(this);
-					
-					ExpList el = new ExpList();
-					for(int n = 1; n < ctx.expression().size(); n++) {
-						el.addElement((Exp) ctx.expression(n).accept(this));
+				case ".":
+					String txt3 = ctx.children.get(2).getText();
+					if(txt3.equals("length")) {
+						Exp exp1 = (Exp) ctx.expression(0).accept(this);
+						return new ArrayLength(exp1);
+					} else {
+						Exp exp1 = (Exp) ctx.expression(0).accept(this);
+						Identifier i = (Identifier) ctx.identifier().accept(this);
+						
+						ExpList el = new ExpList();
+						for(int n = 1; n < ctx.expression().size(); n++) {
+							el.addElement((Exp) ctx.expression(n).accept(this));
+						}
+						return new Call(exp1, i, el);
 					}
-					return new Call(exp1, i, el);
 				}
 			}
-		}						
-			 
+		}
+		
+		return null;
 	}
 		
 
