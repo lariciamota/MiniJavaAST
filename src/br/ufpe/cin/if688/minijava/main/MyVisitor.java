@@ -164,7 +164,7 @@ public class MyVisitor implements AntlrVisitor<Object>{
 				if('0'<= text.charAt(0) && text.charAt(0) <= '9') {
 					return ctx.integer().accept(this);
 				} else {
-					return new IdentifierExp( ctx.getText());
+					return new IdentifierExp(ctx.getText());
 				}
 			} else {
 				if(ctx.getChild(0) instanceof ExpressionContext){
@@ -224,24 +224,24 @@ public class MyVisitor implements AntlrVisitor<Object>{
 
 	@Override
 	public Object visitStatement(StatementContext ctx) {
-		String text = ctx.getText();
-		if(text.contains("{")){
+		String text = ctx.getChild(0).getText();
+		if(text.equals("{")){
 			Iterator<StatementContext> i = ctx.statement().iterator();
 			StatementList sl = new StatementList();
 			while(i.hasNext()) {
 				sl.addElement((Statement) i.next().accept(this));
 			}
 			return new Block(sl);
-		} else if(text.contains("if")){
+		} else if(text.equals("if")){
 			Exp e = (Exp) ctx.expression(0).accept(this);
 			Statement s1 = (Statement) ctx.statement(0).accept(this);
 			Statement s2 = (Statement) ctx.statement(1).accept(this);
 			return new If(e, s1, s2);
-		} else if(text.contains("while")){
+		} else if(text.equals("while")){
 			Exp ex = (Exp) ctx.expression(0).accept(this);
 			Statement s = (Statement) ctx.statement(0).accept(this);
 			return new While(ex, s);
-		} else if(text.contains("System.out.println")){
+		} else if(text.equals("System.out.println")){
 			Exp exp = (Exp) ctx.expression(0).accept(this);
 			return new Print(exp);
 		} else {
